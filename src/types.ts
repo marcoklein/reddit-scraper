@@ -1,16 +1,8 @@
 import type { RedditCommentData, RedditPostData } from "./types-api.js";
 
-export interface Comment extends RedditCommentData {
-}
-
 export interface Post extends RedditPostData {
   /**
-   * Subreddit this post is in.
+   * Flattened replies section.
    */
-  subreddit: string;
-
-  /**
-   * Comment tree.
-   */
-  comments: Comment[];
+  replies_flat: Omit<RedditCommentData, 'replies'>[] | []
 }

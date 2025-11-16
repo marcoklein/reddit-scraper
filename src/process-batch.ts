@@ -1,8 +1,7 @@
 import { fetchNewestPostsBatch as fetchNewRedditPostsBatch, fetchComments } from "./reddit-api.js";
 import { getLogger } from "./logger.js";
 import { readPost, savePost } from "./storage.js";
-import type { Comment } from "./types.js";
-import type { RedditCommentListing, RedditComment, RedditMoreComments } from "./types-api.js";
+import type { RedditCommentListing, RedditComment, RedditMoreComments, RedditCommentData } from "./types-api.js";
 
 export async function processBatch(
   subreddit: string,
@@ -17,10 +16,10 @@ export async function processBatch(
     after
   );
 
-  function mapRedditCommentListingDtoToDomain(
+  function flattenComments(
     commentListing: RedditCommentListing
-  ): Comment[] {
-    const comments: Comment[] = [];
+  ): Array<Omit<RedditCommentData, 'replies'>> {
+    const comments: Omit<RedditCommentData, 'replies'>[] = [];
 
     function traverse(children: (RedditComment | RedditMoreComments)[]): void {
       for (const child of children) {
@@ -28,7 +27,7 @@ export async function processBatch(
           // Skip "more" comments objects
           logger.debug(`DEBUG: skipping "more" comments object. Would be ${child.data.count} more replies.`);
         } else if (child.kind === "t1") { // Only process actual comments (t1)
-          const commentData: Comment = child.data;
+          const commentData = child.data;
 
           comments.push(commentData);
 
@@ -38,6 +37,13 @@ export async function processBatch(
             child.data.replies.data?.children) {
             traverse(child.data.replies.data.children);
           }
+
+          // TODO add user option to include html
+          // @ts-ignore clear html as it just eats up space
+          delete commentData.body_html
+
+          // @ts-ignore do not store replies
+          delete commentData.replies
         } else {
           logger.debug(`DEBUG: unprocessable child when processing comments: ${JSON.stringify(child)}`);
         }
@@ -50,13 +56,15 @@ export async function processBatch(
 
     return comments;
   }
-
-  const postsWithoutComments = postBatchResponse.data.children.map((post) => ({
-    channel: subreddit,
-    ...post.data,
-  }));
+  const postsWithoutComments = postBatchResponse.data.children.map(({ data }) => (
+    data
+  ))
 
   for (const postWithoutComments of postsWithoutComments) {
+    // TODO add user option to include html
+    // @ts-ignore remove html attribute as it just eats memory
+    delete postWithoutComments.selftext_html;
+
     const existingPostData = await readPost(postWithoutComments);
     logger.debug(`Processing ${postWithoutComments.title.substring(0, 50)}...`);
     if (existingPostData)
@@ -78,10 +86,11 @@ export async function processBatch(
         subreddit,
         postWithoutComments.id
       );
-      const comments = mapRedditCommentListingDtoToDomain(result);
-      await savePost({ ...postWithoutComments, ...{ comments } });
+      const comments = flattenComments(result);
+
+      await savePost({ ...postWithoutComments, ...{ replies_flat: comments } });
     } else {
-      await savePost({ ...postWithoutComments, ...{ comments: [] } });
+      await savePost({ ...postWithoutComments, ...{ replies_flat: [] } });
       logger.debug("skipping comments fetch - post has no comments");
     }
   }
