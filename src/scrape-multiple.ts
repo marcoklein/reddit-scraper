@@ -34,6 +34,12 @@ export interface ScrapeMultipleSubredditsOptions {
    * @default false
    */
   enableDebug?: boolean;
+  /**
+   * Directory to store scraped posts.
+   * 
+   * @default "./results"
+   */
+  storageDirectory?: string;
 }
 
 export interface ScrapeResult {
@@ -89,7 +95,7 @@ export interface ScrapeMultipleResults {
 export async function scrapeMultipleSubreddits(
   options: ScrapeMultipleSubredditsOptions
 ): Promise<ScrapeMultipleResults> {
-  const { subreddits, maxPostCount, maxDays, maxPostAge, enableDebug } = options;
+  const { subreddits, maxPostCount, maxDays, maxPostAge, enableDebug, storageDirectory } = options;
 
   // Validate inputs
   if (!subreddits || subreddits.length === 0) {
@@ -130,6 +136,7 @@ export async function scrapeMultipleSubreddits(
         subreddit,
         maxPostCount,
         maxPostAge: finalMaxPostAge,
+        storageDirectory,
       });
 
       results.push({

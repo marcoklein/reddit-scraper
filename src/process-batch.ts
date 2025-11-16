@@ -7,7 +7,8 @@ export async function processBatch(
   subreddit: string,
   authToken: string,
   batchSize: number,
-  after?: string): Promise<{ after: string | null; fetchedPostsCount: number; oldestDate: number; }> {
+  after?: string,
+  storageDirectory?: string): Promise<{ after: string | null; fetchedPostsCount: number; oldestDate: number; }> {
   const logger = getLogger();
   const postBatchResponse = await fetchNewRedditPostsBatch(
     authToken,
@@ -65,7 +66,7 @@ export async function processBatch(
     // @ts-ignore remove html attribute as it just eats memory
     delete postWithoutComments.selftext_html;
 
-    const existingPostData = await readPost(postWithoutComments);
+    const existingPostData = await readPost(postWithoutComments, storageDirectory);
     logger.debug(`Processing ${postWithoutComments.title.substring(0, 50)}...`);
     if (existingPostData)
       logger.debug("Found persisted comments data for post");
@@ -88,9 +89,9 @@ export async function processBatch(
       );
       const comments = flattenComments(result);
 
-      await savePost({ ...postWithoutComments, ...{ replies_flat: comments } });
+      await savePost({ ...postWithoutComments, ...{ replies_flat: comments } }, storageDirectory);
     } else {
-      await savePost({ ...postWithoutComments, ...{ replies_flat: [] } });
+      await savePost({ ...postWithoutComments, ...{ replies_flat: [] } }, storageDirectory);
       logger.debug("skipping comments fetch - post has no comments");
     }
   }

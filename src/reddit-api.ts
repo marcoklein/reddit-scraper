@@ -64,8 +64,7 @@ export async function fetchNewestPostsBatch(
 ): Promise<RedditListing> {
   const params = new URLSearchParams({
     raw_json: "1",
-    limit: limit.toString(),
-    show: "all",
+    limit: limit.toString()
   });
 
   if (after) {

@@ -10,6 +10,7 @@ interface CliArgs {
   maxDays?: number;
   verbose?: boolean;
   help?: boolean;
+  output?: string;
 }
 
 function showHelp(): void {
@@ -24,6 +25,7 @@ Required:
 Options:
   -p, --max-posts <number>    Maximum number of posts to scrape per subreddit (default: 100)
   -d, --max-days <number>     Number of days back to scrape (default: 7)
+  -o, --output <path>         Directory to store scraped posts (default: "./results" or STORAGE_PATH env var)
   -v, --verbose               Enable verbose/debug logging
   -h, --help                  Show this help message
 
@@ -33,6 +35,9 @@ Examples:
 
   # Scrape multiple subreddits
   reddit-scraper --subreddit improv,comedy,standupcomedy
+
+  # Use custom output directory
+  reddit-scraper --subreddit improv --output ./my-data
 `);
 }
 
@@ -59,6 +64,10 @@ function parseArgs(args: string[]): CliArgs {
       case "-d":
       case "--max-days":
         parsed.maxDays = parseInt(args[++i], 10);
+        break;
+      case "-o":
+      case "--output":
+        parsed.output = args[++i];
         break;
       case "-v":
       case "--verbose":
@@ -101,11 +110,15 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  // Determine storage directory: CLI flag > environment variable > default
+  const storageDirectory = args.output || process.env.STORAGE_PATH;
+
   await scrapeMultipleSubreddits({
     subreddits: args.subreddits,
     maxPostCount: args.maxPosts,
     maxDays: args.maxDays,
     enableDebug: args.verbose ?? false,
+    storageDirectory,
   });
 }
 

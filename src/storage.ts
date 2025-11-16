@@ -7,11 +7,12 @@ import { getLogger } from "./logger.js";
  * Persists a Reddit post.
  *
  * @param post Post to persist.
+ * @param storageDirectory Base directory for storing posts (default: "./results").
  */
-export async function savePost(post: Post) {
+export async function savePost(post: Post, storageDirectory: string = "./results") {
   const logger = getLogger();
   const filePath =
-    `./results/${post.subreddit}/${post.created_utc}-${post.id}.json`;
+    `${storageDirectory}/${post.subreddit}/${post.created_utc}-${post.id}.json`;
   logger.debug(`Saving post ${post.id} to ${filePath}`)
 
   // Ensure directory exists
@@ -28,15 +29,16 @@ export async function savePost(post: Post) {
  * Reads a persisted post.
  *
  * @param postId Subset of a Post to identify the write location.
+ * @param storageDirectory Base directory for storing posts (default: "./results").
  * @returns
  */
 export async function readPost(postId: {
   subreddit: string;
   created_utc: number;
   id: string;
-}): Promise<Post | undefined> {
+}, storageDirectory: string = "./results"): Promise<Post | undefined> {
   const logger = getLogger();
-  const filePath = `./results/${postId.subreddit}/${postId.created_utc}-${postId.id}.json`
+  const filePath = `${storageDirectory}/${postId.subreddit}/${postId.created_utc}-${postId.id}.json`
   logger.debug(`Reading post from ${filePath}`)
   
   try {

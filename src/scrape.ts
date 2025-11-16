@@ -28,6 +28,12 @@ export interface ScrapeSubredditOptions {
    * @default Last seven days (`Math.floor(Date.now() / 1000) - 7 * 24 * 60 * 60`)
    */
   maxPostAge?: number;
+  /**
+   * Directory to store scraped posts.
+   *
+   * @default "./results"
+   */
+  storageDirectory?: string;
 }
 
 
@@ -73,7 +79,7 @@ export async function scrapeSubreddit(options: ScrapeSubredditOptions): Promise<
       after: newAfter,
       fetchedPostsCount,
       oldestDate: oldestTimestamp,
-    } = await processBatch(subreddit, accessToken, batchSize, lastAfter ?? undefined);
+    } = await processBatch(subreddit, accessToken, batchSize, lastAfter ?? undefined, options.storageDirectory);
 
     currentNumberOfFetchedPosts += fetchedPostsCount;
 
