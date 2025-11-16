@@ -84,15 +84,15 @@ export async function scrapeSubreddit(options: ScrapeSubredditOptions): Promise<
       logger.info(`Reached posts older than provided max age (${maxPostAge}). Stopping.`);
       break;
     }
-    if (lastAfter === newAfter) {
-      lastAfter = newAfter;
-      logger.info("Reached maximum number of posts Reddit allows the API to scrape. Stopping.")
-      break;
-    }
     if (currentNumberOfFetchedPosts >= maxPostCount) {
       logger.info("Reached maximum number of posts to scrape. Stopping.")
       break;
     }
+    if (lastAfter === newAfter) {
+      logger.info("Reached maximum number of posts Reddit allows the API to scrape. Stopping.")
+      break;
+    }
+    lastAfter = newAfter;
   }
 }
 
