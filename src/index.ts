@@ -1,8 +1,13 @@
 import { loadEnv } from "./load-env.js";
 loadEnv();
 
-import { scrapeSubreddit } from "./scrape.js";
+export { scrapeSubreddit } from "./scrape.js";
+export { scrapeMultipleSubreddits } from "./scrape-multiple.js";
 
-
-// TODO this is still an example call and the functions have to be exported
-await scrapeSubreddit({ subreddit: 'improv', maxPostCount: 2 })
+export type { ScrapeSubredditOptions } from "./scrape.js";
+export type {
+  ScrapeMultipleSubredditsOptions,
+  ScrapeResult,
+  ScrapeMultipleResults
+} from "./scrape-multiple.js";
+export type { Post, Comment } from "./types.js";

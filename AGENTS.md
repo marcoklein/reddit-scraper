@@ -36,3 +36,7 @@
 - Uses Node.js runtime (>=18.0.0)
 - Environment variables: `REDDIT_CLIENT_ID`, `REDDIT_SECRET`
 - Node.js APIs: `fs/promises` for file operations, `process.argv` for CLI args
+
+## Documentation
+- When making changes that affect functionality, update CHANGELOG.md following [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format
+- Use semantic versioning: MAJOR.MINOR.PATCH (e.g., breaking changes = major, new features = minor, bug fixes = patch)

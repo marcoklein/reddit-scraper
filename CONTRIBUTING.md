@@ -158,7 +158,7 @@ This section is for maintainers with publish access to npm.
    - **MINOR** version (e.g., 0.1.0 → 0.2.0): New features, backwards compatible
    - **PATCH** version (e.g., 0.1.0 → 0.1.1): Bug fixes, backwards compatible
 
-3. Update CHANGELOG.md (if present) or document changes in release notes
+3. **Update CHANGELOG.md** Add a new version section following [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format
 
 ### Release Steps
 
@@ -224,7 +224,7 @@ This section is for maintainers with publish access to npm.
 ## Questions?
 
 If you have questions about contributing, feel free to open an issue on GitHub for discussion.
-
+   
 ## License
 
 By contributing to reddit-scraper, you agree that your contributions will be licensed under the MIT License.

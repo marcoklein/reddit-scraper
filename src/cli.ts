@@ -2,11 +2,10 @@
 import { loadEnv } from "./load-env.js";
 loadEnv(); // Load .env before anything else
 
-import { setGlobalLogger, Logger } from "./logger.js";
-import { scrapeSubreddit } from "./scrape.js";
+import { scrapeMultipleSubreddits } from "./scrape-multiple.js";
 
 interface CliArgs {
-  subreddit?: string;
+  subreddits?: string[];
   maxPosts?: number;
   maxDays?: number;
   verbose?: boolean;
@@ -18,20 +17,22 @@ function showHelp(): void {
 Usage: reddit-scraper --subreddit <name> [options]
 
 Required:
-  -s, --subreddit <name>    Subreddit name (without r/)
+  -s, --subreddit <name>      Subreddit name (without r/)
+      --subreddits <names>    Comma-separated list of subreddits
+                              Both flags work the same way and support single or multiple subreddits
 
 Options:
-  -p, --max-posts <number>  Maximum number of posts to scrape (default: 100)
-  -d, --max-days <number>   Number of days back to scrape (default: 7)
-  -v, --verbose             Enable verbose/debug logging
-  -h, --help                Show this help message
+  -p, --max-posts <number>    Maximum number of posts to scrape per subreddit (default: 100)
+  -d, --max-days <number>     Number of days back to scrape (default: 7)
+  -v, --verbose               Enable verbose/debug logging
+  -h, --help                  Show this help message
 
 Examples:
-  # Scrape last 7 days from r/improv (quiet mode)
+  # Scrape single subreddit
   reddit-scraper --subreddit improv
 
-  # Scrape 50 posts from last 30 days with verbose logging
-  reddit-scraper -s improv -p 50 -d 30 -v
+  # Scrape multiple subreddits
+  reddit-scraper --subreddit improv,comedy,standupcomedy
 `);
 }
 
@@ -44,7 +45,12 @@ function parseArgs(args: string[]): CliArgs {
     switch (arg) {
       case "-s":
       case "--subreddit":
-        parsed.subreddit = args[++i];
+      case "--subreddits":
+        const value = args[++i];
+        parsed.subreddits = value
+          .split(',')
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
         break;
       case "-p":
       case "--max-posts":
@@ -79,8 +85,8 @@ async function main(): Promise<void> {
     process.exit(0);
   }
 
-  if (!args.subreddit) {
-    console.error("Error: --subreddit is required\n");
+  if (!args.subreddits || args.subreddits.length === 0) {
+    console.error("Error: --subreddit or --subreddits is required\n");
     showHelp();
     process.exit(1);
   }
@@ -95,15 +101,11 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  setGlobalLogger(new Logger({ enableDebug: args.verbose ?? false }));
-
-  const maxDays = args.maxDays ?? 7;
-  const maxPostAge = Math.floor(Date.now() / 1000) - (maxDays * 24 * 60 * 60);
-
-  await scrapeSubreddit({
-    subreddit: args.subreddit,
+  await scrapeMultipleSubreddits({
+    subreddits: args.subreddits,
     maxPostCount: args.maxPosts,
-    maxPostAge,
+    maxDays: args.maxDays,
+    enableDebug: args.verbose ?? false,
   });
 }
 
