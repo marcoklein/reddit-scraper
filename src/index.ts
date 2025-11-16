@@ -10,4 +10,4 @@ export type {
   ScrapeResult,
   ScrapeMultipleResults
 } from "./scrape-multiple.js";
-export type { Post, Comment } from "./types.js";
+export type { Post } from "./types.js";
