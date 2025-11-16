@@ -1,6 +1,6 @@
 {
   "name": "reddit-scraper",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Reddit scraper for fetching posts and comments via the official API with automatic caching",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
